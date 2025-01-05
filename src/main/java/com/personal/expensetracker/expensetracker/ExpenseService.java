@@ -22,4 +22,23 @@ public class ExpenseService {
     public Expense addExpense(Expense expense){
         return expenseRepository.save(expense);
     }
+
+    public Expense editExpense(Expense existingExpense, Expense updatedExpense) {
+        existingExpense.setAmount(updatedExpense.getAmount());
+        existingExpense.setDate(updatedExpense.getDate());
+        existingExpense.setDescription(updatedExpense.getDescription());
+        existingExpense.setModeOfPayment(updatedExpense.getModeOfPayment());
+        return expenseRepository.save(existingExpense);
+    }
+
+    public boolean deleteExpense(Long id){
+        boolean deleted = true;
+        if(expenseRepository.existsById(id)) expenseRepository.deleteById(id);
+        else deleted = false;
+        return deleted;
+    }
+
+    public Double getTotalExpenses(){
+        return expenseRepository.getTotalExpenses();
+    }
 }
