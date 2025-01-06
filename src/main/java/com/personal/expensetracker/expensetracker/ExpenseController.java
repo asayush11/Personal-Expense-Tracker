@@ -15,9 +15,10 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @GetMapping("/view")
-    public ResponseEntity<APIResponse<List<Expense>>> displayExpenses(){
+    public ResponseEntity<APIResponse<List<Expense>>> displayExpenses(@RequestParam String email){
+        if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
-            List<Expense> expenses = expenseService.getAllExpenses();
+            List<Expense> expenses = expenseService.getAllExpenses(email);
             return ResponseEntity.ok(APIResponse.success("Expenses fetched successfully", expenses));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
@@ -25,9 +26,10 @@ public class ExpenseController {
     }
 
     @GetMapping("/view{id}")
-    public ResponseEntity<APIResponse<Expense>> getExpenseById(@PathVariable Long id){
+    public ResponseEntity<APIResponse<Expense>> getExpenseById(@RequestParam String email, @PathVariable Long id){
+        if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
-            Expense expense = expenseService.getExpenseById(id)
+            Expense expense = expenseService.getExpenseById(id, email)
                               .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + id));
             return ResponseEntity.ok(APIResponse.success("Expense fetched successfully", expense));
         } catch (Exception e) {
@@ -46,10 +48,11 @@ public class ExpenseController {
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<APIResponse<Expense>> editExpenseById(@Valid @RequestBody Expense updatedExpense){
+    public ResponseEntity<APIResponse<Expense>> editExpenseById(@RequestParam String email, @Valid @RequestBody Expense updatedExpense){
+        if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         Long id = updatedExpense.getId();
         try {
-            Expense existingExpense = expenseService.getExpenseById(id)
+            Expense existingExpense = expenseService.getExpenseById(id, email)
                     .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + id));
             Expense expense = expenseService.editExpense(existingExpense,updatedExpense);
             return ResponseEntity.ok(APIResponse.success("Expense edited successfully", expense));
@@ -59,17 +62,19 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/remove{id}")
-    public ResponseEntity<APIResponse<Void>> removeExpense(@PathVariable Long id){
-        if(!expenseService.deleteExpense(id)){
+    public ResponseEntity<APIResponse<Void>> removeExpense(@RequestParam String email, @PathVariable Long id){
+        if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        if(!expenseService.deleteExpense(id, email)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to delete expense", "Expense not found with ID: " + id));
         }
         return ResponseEntity.ok(APIResponse.success("Expense Deleted Successfully", null));
     }
 
     @GetMapping("/total")
-    public ResponseEntity<APIResponse<Double>> getTotalExpenses(){
+    public ResponseEntity<APIResponse<Double>> getTotalExpenses(@RequestParam String email){
+        if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
-            Double totalExpenses = expenseService.getTotalExpenses();
+            Double totalExpenses = expenseService.getTotalExpenses(email);
             if(totalExpenses == null) totalExpenses = 0.0;
             return ResponseEntity.ok(APIResponse.success("Expense fetched successfully", totalExpenses));
         } catch (Exception e) {
