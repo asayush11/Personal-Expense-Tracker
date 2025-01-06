@@ -2,11 +2,6 @@ package com.personal.expensetracker.expensetracker;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-
-
 import java.time.LocalDate;
 
 @Entity
@@ -29,6 +24,10 @@ public class Expense {
     private LocalDate date;
 
     private String modeOfPayment;
+
+    @ManyToOne
+    @JoinColumn(name = "user_email", nullable = false)
+    private User user;
 
     public Expense(){
     }
@@ -70,5 +69,13 @@ public class Expense {
 
     public void setModeOfPayment(String modeOfPayment) {
         this.modeOfPayment = modeOfPayment;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -11,12 +11,12 @@ public class ExpenseService {
     public ExpenseService(ExpenseRepository expenseRepository){
         this.expenseRepository = expenseRepository;
     }
-    public List<Expense> getAllExpenses(){
-        return expenseRepository.findAll();
+    public List<Expense> getAllExpenses(String email){
+        return expenseRepository.findAllByUser_Email(email);
     }
 
-    public Optional<Expense> getExpenseById(Long Id){
-        return expenseRepository.findById(Id);
+    public Optional<Expense> getExpenseById(Long Id, String email){
+        return expenseRepository.findByIdAndUser_Email(Id, email);
     }
 
     public Expense addExpense(Expense expense){
@@ -31,14 +31,14 @@ public class ExpenseService {
         return expenseRepository.save(existingExpense);
     }
 
-    public boolean deleteExpense(Long id){
-        boolean deleted = true;
-        if(expenseRepository.existsById(id)) expenseRepository.deleteById(id);
-        else deleted = false;
-        return deleted;
+    public boolean deleteExpense(Long id, String email){
+        var isdeleted = true;
+        if(expenseRepository.existsByIdAndUser_Email(id, email)) expenseRepository.deleteByIdAndUser_Email(id, email);
+        else isdeleted = false;
+        return isdeleted;
     }
 
-    public Double getTotalExpenses(){
-        return expenseRepository.getTotalExpenses();
+    public Double getTotalExpenses(String email){
+        return expenseRepository.getTotalExpenses(email);
     }
 }
