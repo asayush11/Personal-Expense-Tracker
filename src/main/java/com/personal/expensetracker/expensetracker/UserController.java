@@ -12,17 +12,25 @@ import java.util.Objects;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
+    private final JWTUtil jwtUtil;
+
+    public UserController(UserService userService, JWTUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @GetMapping("/validate")
-    public ResponseEntity<APIResponse<Void>> validateUser(@RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<APIResponse<String>> validateUser(@RequestParam String email, @RequestParam String password) {
         if(email == null || password == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email and password"));
         try {
             User user = userService.getUser(email)
                     .orElseThrow(() -> new RuntimeException("User not found with ID: " + email));
-            if(Objects.equals(password, user.getPassword()))
-             return ResponseEntity.ok(APIResponse.success("Logged in successfully", null));
+            if(Objects.equals(password, user.getPassword())) {
+                String token = jwtUtil.generateToken(email);
+                return ResponseEntity.ok(APIResponse.success("Logged in successfully", token));
+            }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Incorrect password"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", e.getMessage()));
@@ -34,7 +42,8 @@ public class UserController {
         if(userService.userExists(user.getEmail())) return ResponseEntity.status(HttpStatus.CONFLICT).body(APIResponse.error("Failed to create user", "User with this email already exits"));
         try {
             User createdUser = userService.createUser(user);
-            return ResponseEntity.ok(APIResponse.success("User created successfully with name " + createdUser.getName(), createdUser.getEmail()));
+            String token = jwtUtil.generateToken(createdUser.getEmail());
+            return ResponseEntity.ok(APIResponse.success("User created successfully with name " + createdUser.getName(), token));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to create user", e.getMessage()));
         }
@@ -53,7 +62,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/user{email}")
+    @DeleteMapping("/delete{email}")
     public ResponseEntity<APIResponse<Void>> deleteUser(@PathVariable String email){
         if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email"));
         if(!userService.deleteUser(email)){
