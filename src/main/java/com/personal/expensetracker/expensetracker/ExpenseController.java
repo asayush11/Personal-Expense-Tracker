@@ -44,17 +44,25 @@ public class ExpenseController {
                               .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + id));
             return ResponseEntity.ok(APIResponse.success("Expense fetched successfully", expense.convertToDTO()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expense", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to fetch expense", e.getMessage()));
         }
     }
 
     @PostMapping("/add")
-    public ResponseEntity<APIResponse<ExpenseDTO>> addExpense(@Valid @RequestBody Expense expense){
+    public ResponseEntity<APIResponse<ExpenseDTO>> addExpense(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Expense expense){
+        if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
+            String token = authHeader.replace("Bearer","");
+            String email = jwtUtil.validateToken(token);
+            User user = new User();
+            user.setEmail(email);
+            expense.setUser(user);
             Expense savedExpense = expenseService.addExpense(expense);
             return ResponseEntity.ok(APIResponse.success("Expense added successfully", savedExpense.convertToDTO()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to add expense", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to add expense", e.getMessage()));
         }
@@ -72,9 +80,9 @@ public class ExpenseController {
             Expense expense = expenseService.editExpense(existingExpense,updatedExpense);
             return ResponseEntity.ok(APIResponse.success("Expense edited successfully", expense.convertToDTO()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to edit expense", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to fetch expense", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to edit expense", e.getMessage()));
         }
     }
 
@@ -86,7 +94,7 @@ public class ExpenseController {
             String token = authHeader.replace("Bearer", "");
             email = jwtUtil.validateToken(token);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to delete expense", e.getMessage()));
         }
         if (!expenseService.deleteExpense(id, email)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to delete expense", "Expense not found with ID: " + id));
@@ -106,7 +114,7 @@ public class ExpenseController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to fetch expense", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
         }
     }
 
