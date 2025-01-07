@@ -1,9 +1,6 @@
 package com.personal.expensetracker.expensetracker;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchConnectionDetails;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +19,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Expense> expenses;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Loan> loans;
 
     public User(String email, String name, String password) {
         this.email = email;
@@ -63,5 +63,13 @@ public class User {
 
     public void setExpenses(List<Expense> expenses) {
         this.expenses = expenses;
+    }
+
+    public List<Loan> getLoanRecords() {
+        return loans;
+    }
+
+    public void setLoanRecords(List<Loan> loans) {
+        this.loans = loans;
     }
 }
