@@ -1,4 +1,5 @@
 package com.personal.expensetracker.expensetracker;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,6 +88,7 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/remove{id}")
+    @Transactional
     public ResponseEntity<APIResponse<Void>> removeExpense(@RequestHeader("Authorization") String authHeader, @PathVariable Long id) {
         if (authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         String email;
