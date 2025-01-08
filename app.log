@@ -1,0 +1,15 @@
+16:45:15.760 [main] INFO  c.p.e.e.ExpenseTrackerApplication - Starting ExpenseTrackerApplication using Java 21.0.1 with PID 20300 (C:\Users\ASAYU\IdeaProjects\expense-tracker\target\classes started by ASAYU in C:\Users\ASAYU\IdeaProjects\expense-tracker)
+16:45:15.761 [main] DEBUG c.p.e.e.ExpenseTrackerApplication - Running with Spring Boot v3.4.1, Spring v6.2.1
+16:45:15.762 [main] INFO  c.p.e.e.ExpenseTrackerApplication - No active profile set, falling back to 1 default profile: "default"
+16:45:22.306 [main] INFO  c.p.e.e.ExpenseTrackerApplication - Started ExpenseTrackerApplication in 7.072 seconds (process running for 7.813)
+16:46:21.832 [http-nio-8080-exec-6] INFO  c.p.e.expensetracker.UserController - Validating User with email ayush@gmail.com1
+16:46:21.833 [http-nio-8080-exec-6] DEBUG c.p.e.expensetracker.UserController - Retrieving user information for email: ayush@gmail.com1
+16:46:21.923 [http-nio-8080-exec-6] WARN  c.p.e.expensetracker.UserController - User not found with email: ayush@gmail.com1
+16:46:21.923 [http-nio-8080-exec-6] ERROR c.p.e.expensetracker.UserController - Authentication error for user: ayush@gmail.com1 - Error: User not found with ID: ayush@gmail.com1
+16:46:42.486 [http-nio-8080-exec-7] INFO  c.p.e.expensetracker.UserController - Validating User with email ayush@gmail.com
+16:46:42.487 [http-nio-8080-exec-7] DEBUG c.p.e.expensetracker.UserController - Retrieving user information for email: ayush@gmail.com
+16:46:42.511 [http-nio-8080-exec-7] WARN  c.p.e.expensetracker.UserController - Invalid password attempt for user: ayush@gmail.com
+16:47:04.411 [http-nio-8080-exec-8] INFO  c.p.e.expensetracker.UserController - Validating User with email ayush@gmail.com
+16:47:04.411 [http-nio-8080-exec-8] DEBUG c.p.e.expensetracker.UserController - Retrieving user information for email: ayush@gmail.com
+16:47:04.421 [http-nio-8080-exec-8] DEBUG c.p.e.expensetracker.UserController - Password validation successful for user: ayush@gmail.com
+16:47:04.454 [http-nio-8080-exec-8] INFO  c.p.e.expensetracker.UserController - Login successful for user: ayush@gmail.com
