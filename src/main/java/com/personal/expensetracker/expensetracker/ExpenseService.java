@@ -41,4 +41,8 @@ public class ExpenseService {
     public Double getTotalExpenses(String email){
         return expenseRepository.getTotalExpenses(email);
     }
+
+    public Double getTotalExpensesByPaymentMode(String email, String modeOfPayment){
+        return expenseRepository.getTotalExpensesByPaymentMode(email, modeOfPayment);
+    }
 }

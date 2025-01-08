@@ -22,4 +22,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, UserBasedRepo
     @Modifying
     @Query("DELETE FROM Loan l WHERE l.user.email = :email AND l.name = :name")
     public void settleFriend(@Param("email") String email, @Param("name") String name);
+
+    @Query("SELECT SUM(l.amount) FROM Loan l WHERE l.user.email = :email AND l.modeOfPayment = :modeOfPayment AND l.amount > 0")
+    public Double getTotalLentByPaymentMode(@Param("email") String email, @Param("modeOfPayment") String modeOfPayment);
 }

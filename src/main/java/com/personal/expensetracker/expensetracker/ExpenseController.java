@@ -112,7 +112,23 @@ public class ExpenseController {
             String email = jwtUtil.validateToken(token);
             Double totalExpenses = expenseService.getTotalExpenses(email);
             if(totalExpenses == null) totalExpenses = 0.0;
-            return ResponseEntity.ok(APIResponse.success("Expense fetched successfully", totalExpenses));
+            return ResponseEntity.ok(APIResponse.success("Total Expense fetched successfully", totalExpenses));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/total{modeOfPayment}")
+    public ResponseEntity<APIResponse<Double>> getTotalExpensesByPaymentMode(@RequestHeader("Authorization") String authHeader, @PathVariable String modeOfPayment){
+        if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        try {
+            String token = authHeader.replace("Bearer","");
+            String email = jwtUtil.validateToken(token);
+            Double totalExpenses = expenseService.getTotalExpensesByPaymentMode(email, modeOfPayment);
+            if(totalExpenses == null) totalExpenses = 0.0;
+            return ResponseEntity.ok(APIResponse.success("Total Expense fetched successfully for payment mode: " + modeOfPayment, totalExpenses));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
         } catch (Exception e) {
