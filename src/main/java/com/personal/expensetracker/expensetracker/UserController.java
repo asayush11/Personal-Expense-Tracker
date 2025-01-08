@@ -1,5 +1,7 @@
 package com.personal.expensetracker.expensetracker;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,7 @@ import java.util.Objects;
 public class UserController {
     private final UserService userService;
     private final JWTUtil jwtUtil;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService userService, JWTUtil jwtUtil) {
         this.userService = userService;
@@ -19,22 +22,32 @@ public class UserController {
 
     @GetMapping("/validate")
     public ResponseEntity<APIResponse<String>> validateUser(@RequestParam String email, @RequestParam String password) {
+        logger.info("Validating User with email {}", email);
         if(email == null || password == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email and password"));
         try {
+            logger.debug("Retrieving user information for email: {}", email);
             User user = userService.getUser(email)
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + email));
+                    .orElseThrow(() -> {
+                        logger.warn("User not found with email: {}", email);
+                        return new RuntimeException("User not found with ID: " + email);
+                    });
             if(Objects.equals(password, user.getPassword())) {
+                logger.debug("Password validation successful for user: {}", email);
                 String token = jwtUtil.generateToken(email);
+                logger.info("Login successful for user: {}", email);
                 return ResponseEntity.ok(APIResponse.success("Logged in successfully", token));
             }
+            logger.warn("Invalid password attempt for user: {}", email);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Incorrect password"));
         } catch (Exception e) {
+            logger.error("Authentication error for user: {} - Error: {}", email, e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", e.getMessage()));
         }
     }
 
     @PostMapping("/create")
     public ResponseEntity<APIResponse<String>> createUser(@Valid @RequestBody User user){
+        logger.info("Attempting to create new user with email: {}", user.getEmail());
         if(userService.userExists(user.getEmail())) return ResponseEntity.status(HttpStatus.CONFLICT).body(APIResponse.error("Failed to create user", "User with this email already exits"));
         try {
             User createdUser = userService.createUser(user);
