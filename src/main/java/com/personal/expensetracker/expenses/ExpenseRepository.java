@@ -1,4 +1,5 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.expenses;
+import com.personal.expensetracker.users.UserBasedRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

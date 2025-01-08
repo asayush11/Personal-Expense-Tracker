@@ -1,4 +1,7 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.loans;
+import com.personal.expensetracker.utilities.APIResponse;
+import com.personal.expensetracker.utilities.JWTUtil;
+import com.personal.expensetracker.users.User;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

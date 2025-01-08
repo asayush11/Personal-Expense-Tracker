@@ -1,4 +1,4 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.users;
 import org.springframework.data.repository.NoRepositoryBean;
 import java.util.List;
 import java.util.Optional;

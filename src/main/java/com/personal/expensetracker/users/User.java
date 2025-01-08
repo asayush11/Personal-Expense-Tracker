@@ -1,4 +1,6 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.users;
+import com.personal.expensetracker.expenses.Expense;
+import com.personal.expensetracker.loans.Loan;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;

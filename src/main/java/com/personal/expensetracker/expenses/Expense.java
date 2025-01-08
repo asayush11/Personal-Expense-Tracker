@@ -1,4 +1,5 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.expenses;
+import com.personal.expensetracker.users.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.loans;
 
 import java.time.LocalDate;
 
