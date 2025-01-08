@@ -53,4 +53,8 @@ public class LoanService {
     public List<Loan> findAllLoansGiven(String email){
         return loanRepository.findAllLoansGiven(email);
     }
+
+    public Double getTotalLentByPaymentMode(String email, String modeOfPayment){
+        return loanRepository.getTotalLentByPaymentMode(email, modeOfPayment);
+    }
 }

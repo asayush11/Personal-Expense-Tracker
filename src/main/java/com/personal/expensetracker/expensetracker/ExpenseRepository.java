@@ -8,4 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface ExpenseRepository extends JpaRepository<Expense, Long>, UserBasedRepository<Expense, Long> {
     @Query("SELECT SUM(e.amount) FROM Expense e WHERE e.user.email = :email")
     public Double getTotalExpenses(@Param("email") String email);
+
+    @Query("SELECT SUM(e.amount) FROM Expense e WHERE e.user.email = :email AND e.modeOfPayment = :modeOfPayment")
+    public Double getTotalExpensesByPaymentMode(@Param("email") String email, @Param("modeOfPayment") String modeOfPayment);
 }

@@ -173,11 +173,27 @@ public class LoanController {
             String email = jwtUtil.validateToken(token);
             Double totalLoans = loanService.getNetLoan(email);
             if(totalLoans == null) totalLoans = 0.0;
-            return ResponseEntity.ok(APIResponse.success("Loan fetched successfully", totalLoans));
+            return ResponseEntity.ok(APIResponse.success("Net Loan fetched successfully", totalLoans));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch loans", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to fetch loans", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/net{modeOfPayment}")
+    public ResponseEntity<APIResponse<Double>> getTotalLentByPaymentMode(@RequestHeader("Authorization") String authHeader, @PathVariable String modeOfPayment){
+        if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        try {
+            String token = authHeader.replace("Bearer","");
+            String email = jwtUtil.validateToken(token);
+            Double totalLent = loanService.getTotalLentByPaymentMode(email, modeOfPayment);
+            if(totalLent == null) totalLent = 0.0;
+            return ResponseEntity.ok(APIResponse.success("Total Lent fetched successfully for payment mode: " + modeOfPayment, totalLent));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
         }
     }
 
