@@ -1,6 +1,4 @@
-package com.personal.expensetracker.expensetracker;
-
-import jakarta.validation.constraints.NotNull;
+package com.personal.expensetracker.expenses;
 
 import java.time.LocalDate;
 

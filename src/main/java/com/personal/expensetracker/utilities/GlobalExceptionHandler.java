@@ -1,4 +1,4 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.utilities;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

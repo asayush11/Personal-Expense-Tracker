@@ -1,4 +1,4 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.utilities;
 
 public class APIResponse<T> {
     private boolean success;

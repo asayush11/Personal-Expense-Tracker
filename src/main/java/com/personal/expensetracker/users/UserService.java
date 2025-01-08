@@ -1,4 +1,6 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.users;
+import com.personal.expensetracker.users.User;
+import com.personal.expensetracker.users.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

@@ -13,7 +13,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.personal.expensetracker.expensetracker" level="DEBUG" additivity="false">
+    <logger name="com.personal.expensetracker" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </logger>

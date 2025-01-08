@@ -1,4 +1,6 @@
-package com.personal.expensetracker.expensetracker;
+package com.personal.expensetracker.users;
+import com.personal.expensetracker.utilities.APIResponse;
+import com.personal.expensetracker.utilities.JWTUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
