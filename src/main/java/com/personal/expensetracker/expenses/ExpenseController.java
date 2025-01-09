@@ -1,6 +1,8 @@
 package com.personal.expensetracker.expenses;
+import com.personal.expensetracker.loans.Loan;
 import com.personal.expensetracker.users.User;
 import com.personal.expensetracker.utilities.APIResponse;
+import com.personal.expensetracker.utilities.CategorisedAmounts;
 import com.personal.expensetracker.utilities.JWTUtil;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -8,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -123,15 +128,24 @@ public class ExpenseController {
         }
     }
 
-    @GetMapping("/total{modeOfPayment}")
-    public ResponseEntity<APIResponse<Double>> getTotalExpensesByPaymentMode(@RequestHeader("Authorization") String authHeader, @PathVariable String modeOfPayment){
+    @GetMapping("/view/modeOfPayment")
+    public ResponseEntity<APIResponse<List<CategorisedAmounts>>> getTotalExpensesByPaymentMode(@RequestHeader("Authorization") String authHeader){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
             String token = authHeader.replace("Bearer","");
             String email = jwtUtil.validateToken(token);
-            Double totalExpenses = expenseService.getTotalExpensesByPaymentMode(email, modeOfPayment);
-            if(totalExpenses == null) totalExpenses = 0.0;
-            return ResponseEntity.ok(APIResponse.success("Total Expense fetched successfully for payment mode: " + modeOfPayment, totalExpenses));
+            List<Expense> expenses = expenseService.getAllExpenses(email);
+            Map<String, DoubleSummaryStatistics> expenseSummary = expenses.stream()
+                    .collect(Collectors.groupingBy(
+                            Expense::getModeOfPayment,
+                            Collectors.summarizingDouble(Expense::getAmount)
+                    ));
+            List<CategorisedAmounts> categorisedAmounts = expenseSummary.entrySet().stream()
+                    .map(entry -> new CategorisedAmounts(
+                            entry.getKey(),
+                            entry.getValue().getSum()
+                    )).toList();
+            return ResponseEntity.ok(APIResponse.success("Total Expenses fetched successfully for all payment modes", categorisedAmounts));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
         } catch (Exception e) {

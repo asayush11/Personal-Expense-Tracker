@@ -1,5 +1,6 @@
 package com.personal.expensetracker.loans;
 import com.personal.expensetracker.utilities.APIResponse;
+import com.personal.expensetracker.utilities.CategorisedAmounts;
 import com.personal.expensetracker.utilities.JWTUtil;
 import com.personal.expensetracker.users.User;
 import jakarta.transaction.Transactional;
@@ -25,7 +26,7 @@ public class LoanController {
     }
 
     @GetMapping("/view")
-    public ResponseEntity<APIResponse<List<LoanDTO>>> displayLoans(@RequestHeader("Authorization") String authHeader){
+    public ResponseEntity<APIResponse<List<CategorisedAmounts>>> displayLoans(@RequestHeader("Authorization") String authHeader){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
             String token = authHeader.replace("Bearer","");
@@ -36,12 +37,12 @@ public class LoanController {
                             Loan::getName,
                             Collectors.summarizingDouble(Loan::getAmount)
                     ));
-            List<LoanDTO> loanDTOs = loanSummary.entrySet().stream()
-                    .map(entry -> new LoanDTO(
+            List<CategorisedAmounts> categorisedAmounts = loanSummary.entrySet().stream()
+                    .map(entry -> new CategorisedAmounts(
                             entry.getKey(),
                             entry.getValue().getSum()
                     )).toList();
-            return ResponseEntity.ok(APIResponse.success("Loans fetched successfully", loanDTOs));
+            return ResponseEntity.ok(APIResponse.success("Loans fetched successfully", categorisedAmounts));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch loans", e.getMessage()));
         }  catch (Exception e) {
@@ -150,7 +151,7 @@ public class LoanController {
         return ResponseEntity.ok(APIResponse.success("Loan Deleted Successfully", null));
     }
 
-    @DeleteMapping("/remove")
+    @DeleteMapping("/settlefriend")
     @Transactional
     public ResponseEntity<APIResponse<Void>> settleFriend(@RequestHeader("Authorization") String authHeader, @RequestParam String name) {
         if (authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
@@ -184,15 +185,24 @@ public class LoanController {
         }
     }
 
-    @GetMapping("/net{modeOfPayment}")
-    public ResponseEntity<APIResponse<Double>> getTotalLentByPaymentMode(@RequestHeader("Authorization") String authHeader, @PathVariable String modeOfPayment){
+    @GetMapping("/view/modeOfPayment")
+    public ResponseEntity<APIResponse<List<CategorisedAmounts>>> getTotalLentByPaymentMode(@RequestHeader("Authorization") String authHeader){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         try {
             String token = authHeader.replace("Bearer","");
             String email = jwtUtil.validateToken(token);
-            Double totalLent = loanService.getTotalLentByPaymentMode(email, modeOfPayment);
-            if(totalLent == null) totalLent = 0.0;
-            return ResponseEntity.ok(APIResponse.success("Total Lent fetched successfully for payment mode: " + modeOfPayment, totalLent));
+            List<Loan> loans = loanService.getAllLoans(email);
+            Map<String, DoubleSummaryStatistics> loanSummary = loans.stream()
+                    .collect(Collectors.groupingBy(
+                            Loan::getModeOfPayment,
+                            Collectors.summarizingDouble(Loan::getAmount)
+                    ));
+            List<CategorisedAmounts> categorisedAmounts = loanSummary.entrySet().stream()
+                    .map(entry -> new CategorisedAmounts(
+                            entry.getKey(),
+                            entry.getValue().getSum()
+                    )).toList();
+            return ResponseEntity.ok(APIResponse.success("Total Lent fetched successfully for all payment modes", categorisedAmounts));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to fetch expenses", e.getMessage()));
         } catch (Exception e) {
