@@ -2,6 +2,8 @@ package com.personal.expensetracker.loans;
 import com.personal.expensetracker.users.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 @Entity
@@ -12,12 +14,15 @@ public class Loan {
     private Long id;
 
     @NotNull(message = "Enter Friend's name")
+    @Size(min = 1)
     private String name;
 
     @NotNull(message = "Enter Description")
+    @Size(min = 1)
     private String description;
 
     @NotNull(message = "Enter Amount")
+    @Size(min = 1)
     private Double amount;
 
     private LocalDate date;

@@ -3,6 +3,8 @@ import com.personal.expensetracker.expenses.Expense;
 import com.personal.expensetracker.loans.Loan;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +13,15 @@ public class User {
     @Id
     @Column(nullable = false, unique = true)
     @NotNull(message = "Enter email")
+    @Size(min = 1)
     private String email;
 
     @NotNull(message = "Enter name")
+    @Size(min = 1)
     private String name;
 
     @NotNull(message = "Enter password")
+    @Size(min = 1)
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

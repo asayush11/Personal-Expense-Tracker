@@ -2,6 +2,7 @@ package com.personal.expensetracker.expenses;
 import com.personal.expensetracker.users.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
@@ -17,9 +18,11 @@ public class Expense {
     private Long id;
 
     @NotNull(message = "Enter Description")
+    @Size(min = 1)
     private String description;
 
     @NotNull(message = "Enter Amount")
+    @Size(min = 1)
     private Double amount;
 
     private LocalDate date;
