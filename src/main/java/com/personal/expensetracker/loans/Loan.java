@@ -22,7 +22,6 @@ public class Loan {
     private String description;
 
     @NotNull(message = "Enter Amount")
-    @Size(min = 1)
     private Double amount;
 
     private LocalDate date;
