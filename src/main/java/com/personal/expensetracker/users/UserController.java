@@ -25,7 +25,7 @@ public class UserController {
     @GetMapping("/validate")
     public ResponseEntity<APIResponse<String>> validateUser(@RequestParam String email, @RequestParam String password) {
         logger.info("Validating User with email {}", email);
-        if(email == null || password == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email and password"));
+        if(Objects.equals(email, "") || Objects.equals(password, "")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email and password"));
         try {
             logger.debug("Retrieving user information for email: {}", email);
             User user = userService.getUser(email)
@@ -62,7 +62,7 @@ public class UserController {
 
     @PutMapping("/changepassword")
     public ResponseEntity<APIResponse<Void>> changePassword(@RequestParam String email, @RequestParam String password){
-        if(email == null || password == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Invalid credentials", "Please enter email and password"));
+        if(Objects.equals(email, "") || Objects.equals(password, "")) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Invalid credentials", "Please enter email and password"));
         try {
             User existingUser = userService.getUser(email)
                     .orElseThrow(() -> new RuntimeException("User not found with ID: " + email));
