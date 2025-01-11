@@ -73,12 +73,21 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/delete{email}")
-    public ResponseEntity<APIResponse<Void>> deleteUser(@PathVariable String email){
-        if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email"));
-        if(!userService.deleteUser(email)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to delete user", "User not found with ID: " + email));
+    @DeleteMapping("/delete")
+    public ResponseEntity<APIResponse<Void>> deleteUser(@RequestHeader("Authorization") String authHeader){
+        if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        try {
+            String token = authHeader.replace("Bearer","");
+            String email = jwtUtil.validateToken(token);
+            if(email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Invalid credentials", "Please enter email"));
+            if(!userService.deleteUser(email)){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(APIResponse.error("Failed to delete user", "User not found with ID: " + email));
+            }
+            return ResponseEntity.ok(APIResponse.success("User Deleted Successfully", null));
+        } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to delete user", e.getMessage()));
+        } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to delete user", e.getMessage()));
         }
-        return ResponseEntity.ok(APIResponse.success("User Deleted Successfully", null));
     }
 }
