@@ -62,6 +62,8 @@ public class ExpenseController {
     @PostMapping("/add")
     public ResponseEntity<APIResponse<ExpenseDTO>> addExpense(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Expense expense){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        if(expense.getAmount() <= 0.0)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error("Failed to add expense", "Enter valid amount"));
         try {
             String token = authHeader.replace("Bearer","");
             String email = jwtUtil.validateToken(token);
@@ -81,6 +83,8 @@ public class ExpenseController {
     public ResponseEntity<APIResponse<ExpenseDTO>> editExpenseById(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Expense updatedExpense){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
         Long id = updatedExpense.getId();
+        if(updatedExpense.getAmount() <= 0.0)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error("Failed to add expense", "Enter valid amount"));
         try {
             String token = authHeader.replace("Bearer","");
             String email = jwtUtil.validateToken(token);
@@ -135,9 +139,14 @@ public class ExpenseController {
             String token = authHeader.replace("Bearer","");
             String email = jwtUtil.validateToken(token);
             List<Expense> expenses = expenseService.getAllExpenses(email);
+
             Map<String, DoubleSummaryStatistics> expenseSummary = expenses.stream()
                     .collect(Collectors.groupingBy(
-                            Expense::getModeOfPayment,
+                            expense -> {
+                                String modeOfPayment = expense.getModeOfPayment();
+                                return modeOfPayment == null || modeOfPayment.trim().isEmpty() ?
+                                        "Not Specified" : modeOfPayment;
+                            },
                             Collectors.summarizingDouble(Expense::getAmount)
                     ));
             List<CategorisedAmounts> categorisedAmounts = expenseSummary.entrySet().stream()
