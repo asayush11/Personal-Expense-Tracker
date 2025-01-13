@@ -1,4 +1,5 @@
 package com.personal.expensetracker.loans;
+import com.personal.expensetracker.expenses.Expense;
 import com.personal.expensetracker.utilities.APIResponse;
 import com.personal.expensetracker.utilities.CategorisedAmounts;
 import com.personal.expensetracker.utilities.JWTUtil;
@@ -98,9 +99,12 @@ public class LoanController {
         }
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<APIResponse<LoanDTO>> addLoan(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Loan loan){
+    @PostMapping("/addLoanGiven")
+    public ResponseEntity<APIResponse<LoanDTO>> addLoanGiven(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Loan loan){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        if(loan.getAmount() == 0.0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error("Failed to add expense", "Enter valid amount"));
+        }
         try {
             String token = authHeader.replace("Bearer","");
             String email = jwtUtil.validateToken(token);
@@ -116,9 +120,34 @@ public class LoanController {
         }
     }
 
+    @PostMapping("/addLoanTaken")
+    public ResponseEntity<APIResponse<LoanDTO>> addLoanTaken(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Loan loan){
+        if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        if(loan.getAmount() == 0.0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error("Failed to add expense", "Enter valid amount"));
+        }
+        try {
+            String token = authHeader.replace("Bearer","");
+            String email = jwtUtil.validateToken(token);
+            User user = new User();
+            user.setEmail(email);
+            loan.setUser(user);
+            loan.setAmount(-1*loan.getAmount());
+            Loan savedLoan = loanService.addLoan(loan);
+            return ResponseEntity.ok(APIResponse.success("Loan added successfully", savedLoan.convertToDTO()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Failed to add loan", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error("Failed to add loan", e.getMessage()));
+        }
+    }
+
     @PutMapping("/edit")
     public ResponseEntity<APIResponse<LoanDTO>> editLoanById(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody Loan updatedLoan){
         if(authHeader == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.error("Unauthorized Access", "Please login"));
+        if(updatedLoan.getAmount() == 0.0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error("Failed to add expense", "Enter valid amount"));
+        }
         Long id = updatedLoan.getId();
         try {
             String token = authHeader.replace("Bearer","");
@@ -194,7 +223,11 @@ public class LoanController {
             List<Loan> loans = loanService.getAllLoans(email);
             Map<String, DoubleSummaryStatistics> loanSummary = loans.stream()
                     .collect(Collectors.groupingBy(
-                            Loan::getModeOfPayment,
+                            loan -> {
+                                String modeOfPayment = loan.getModeOfPayment();
+                                return modeOfPayment == null || modeOfPayment.trim().isEmpty() ?
+                                        "Not Specified" : modeOfPayment;
+                            },
                             Collectors.summarizingDouble(Loan::getAmount)
                     ));
             List<CategorisedAmounts> categorisedAmounts = loanSummary.entrySet().stream()
