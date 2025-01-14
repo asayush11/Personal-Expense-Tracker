@@ -222,6 +222,7 @@ public class LoanController {
             String email = jwtUtil.validateToken(token);
             List<Loan> loans = loanService.getAllLoans(email);
             Map<String, DoubleSummaryStatistics> loanSummary = loans.stream()
+                    .filter( loan -> loan.getAmount() >= 0 )
                     .collect(Collectors.groupingBy(
                             loan -> {
                                 String modeOfPayment = loan.getModeOfPayment();
